@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Rating Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #B3DAF2, #8CBED6); /* Light blue gradient */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px; /* Increased max-width to make the box wider */
+            text-align: center;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h2 {
+            color: #007BFF;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 600;
+            margin: 14px 0 6px;
+            text-align: left;
+            display: block;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+        }
+
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            width: 100%;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="submit"]:active {
+            transform: scale(0.98);
+        }
+
+        .prediction-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            width: 100%; /* Ensure the prediction box fills the available width */
+        }
+
+        .prediction-box.show {
+            display: block;
+        }
+
+        .prediction-box h3 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 50%;
+            right: -200px;
+            transform: translateY(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+            width: 180px;
+        }
+
+        .error-select {
+            border-color: #ff4d4f;
+        }
+    </style>
+    <script>
+        function validateForm() {
+            const selects = document.querySelectorAll('select');
+            let isValid = true;
+
+            selects.forEach(select => {
+                const errorMessage = select.parentElement.querySelector('.error-message');
+                if (select.value === "") {
+                    errorMessage.style.display = 'block';
+                    select.classList.add('error-select');
+                    isValid = false;
+                } else {
+                    errorMessage.style.display = 'none';
+                    select.classList.remove('error-select');
+                }
+            });
+
+            return isValid;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('form').onsubmit = (e) => {
+                if (!validateForm()) {
+                    e.preventDefault();
+                }
+            };
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Restaurant Rating Prediction</h2>
+        <form action="/predict" method="post">
+            <div class="form-group">
+                <label for="online_order">Online Order:</label>
+                <select name="online_order" id="online_order">
+                    <option value="" selected disabled>Choose option</option>
+                    {% for option in online_order_options %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <div class="error-message">Please select an option</div>
+            </div>
+
+            <div class="form-group">
+                <label for="book_table">Book Table:</label>
+                <select name="book_table" id="book_table">
+                    <option value="" selected disabled>Choose option</option>
+                    {% for option in book_table_options %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <div class="error-message">Please select an option</div>
+            </div>
+
+            <div class="form-group">
+                <label for="listed_in_city">City:</label>
+                <select name="listed_in_city" id="listed_in_city">
+                    <option value="" selected disabled>Choose option</option>
+                    {% for option in city_options %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <div class="error-message">Please select an option</div>
+            </div>
+
+            <div class="form-group">
+                <label for="listed_in_type">Type:</label>
+                <select name="listed_in_type" id="listed_in_type">
+                    <option value="" selected disabled>Choose option</option>
+                    {% for option in type_options %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <div class="error-message">Please select an option</div>
+            </div>
+
+            <div class="form-group">
+                <label for="approx_cost">Approx Cost (In Rupees):</label>
+                <input type="number" name="approx_cost" id="approx_cost" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cuisines">Cuisines:</label>
+                <select name="cuisines" id="cuisines">
+                    <option value="" selected disabled>Choose option</option>
+                    {% for option in cuisines_options %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <div class="error-message">Please select an option</div>
+            </div>
+
+            <input type="submit" value="Predict">
+        </form>
+
+        <div class="prediction-box {% if prediction_text %}show{% endif %}">
+            {% if prediction_text %}
+            <h3>{{ prediction_text }}</h3>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
